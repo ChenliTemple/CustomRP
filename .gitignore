@@ -1,3 +1,11 @@
 
-Library/
-Temp/
+Library/Artifacts
+Library
+UserSettings
+*.sln
+*.csproj
+Temp
+Logs
+.idea
+*.cache
+.suo
