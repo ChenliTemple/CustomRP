@@ -11,7 +11,7 @@ public partial class CameraRender
 
     partial void PrepareBuffer();
 
-    //#if UNITY_DEITOR
+    #if UNITY_EDITOR
     static ShaderTagId[] legacyShaderTagIds =
     {
         new ShaderTagId("Always"),
@@ -64,7 +64,7 @@ public partial class CameraRender
         buffer.name = SampleName = camera.name;
         Profiler.EndSample();
     }
-    //#else
-    //    const string sampleName = bufferName;
-    //#endif
+    #else
+        const string sampleName = bufferName;
+    #endif
 }
