@@ -21,7 +21,7 @@ SAMPLER(sampler_BaseMap);
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
 	UNITY_DEFINE_INSTANCED_PROP(float4,_BaseMap_ST)
 	UNITY_DEFINE_INSTANCED_PROP(float4,_BaseColor)
-	UNITY_ACCESS_INSTANCED_PROP(float,_Cutoff)
+	UNITY_DEFINE_INSTANCED_PROP(float,_Cutoff)
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
 Varyings UnlitPassVertex(Attributes input) 
@@ -41,9 +41,11 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
 	UNITY_SETUP_INSTANCE_ID(input);
 	float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap,input.baseUV);
 	float4 basColor = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_BaseColor);
-	float cutValue = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_Cutoff);
 	float4 base = basColor * baseMap;
-	clip(base.a - cutValue);
+	#if defined(_CLIPPING)
+		float cutValue = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_Cutoff);
+		clip(base.a - cutValue);
+	#endif
 	return base;
 }
 
