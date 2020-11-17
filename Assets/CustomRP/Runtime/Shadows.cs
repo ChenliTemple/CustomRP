@@ -63,9 +63,22 @@ public class Shadows
 
     public void Cleanup()
     {
+        int atlasSize = (int)shadowSettings.directional.atlasSize;
         buffer.ReleaseTemporaryRT(dirShadowAltasId);
         buffer.SetRenderTarget(dirShadowAltasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
         buffer.ClearRenderTarget(true, false, Color.clear);
+        buffer.BeginSample(bufferName);
+        ExecuteBuffer();
+        for(int i = 0;i < ShadowedDirectionalLightCount; i++)
+        {
+            RenderDirectionalShadows(i, atlasSize);
+        }
+        buffer.EndSample(bufferName);
         ExecuteBuffer();
     } 
+
+    void RenderDirectionalShadows(int index,int tileSize)
+    {
+
+    }
 }
