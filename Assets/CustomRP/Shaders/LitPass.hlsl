@@ -18,6 +18,7 @@ struct Varyings{
 	float4 positionCS : SV_POSITION;
 	float3 normalWS : VAR_NORMAL;
 	float2 baseUV : VAR_BASE_UV;
+	float3 positionWS : VAR_POSITION;
 
 	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -38,8 +39,8 @@ Varyings LitPassVertex(Attributes input)
 	Varyings output;
 	UNITY_SETUP_INSTANCE_ID(input);
 	UNITY_TRANSFER_INSTANCE_ID(input,output);
-	float3 positionWS = TransformObjectToWorld(input.positionOS);
-	output.positionCS = TransformWorldToHClip(positionWS);
+	output.positionWS = TransformObjectToWorld(input.positionOS);
+	output.positionCS = TransformWorldToHClip(output.positionWS);
 	float4 baseST = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_BaseMap_ST);
 	output.baseUV = input.baseUV * baseST.xy + baseST.zw;
 	output.normalWS = TransformObjectToWorldNormal(input.normalOS);
@@ -58,13 +59,18 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
 		clip(base.a - cutValue);
 	#endif
 	surface.normal = normalize(input.normalWS);
+	surface.viewDirection = normalize(_WorldSpaceCameraPos - input.positionWS);
 	surface.color = base.rgb;
 	surface.alpha = base.a;
 	surface.metallic = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_Metallic);
 	surface.smoothness = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial,_Smoothness);
 
 	BRDF brdf;
-	brdf = GetBRDF(surface);
+	#if defined(_PREMULTIPLY_ALPHA)
+		brdf = GetBRDF(surface,true);
+	#else
+		brdf = GetBRDF(surface);
+	#endif
 	float3 color = GetLighting(surface,brdf);
 	return float4(color,surface.alpha);
 }

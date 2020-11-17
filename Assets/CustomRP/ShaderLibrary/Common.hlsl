@@ -1,7 +1,11 @@
 ﻿#ifndef UNITY_COMMON_INCLUDE
 #define UNITY_COMMON_INCLUDE
 
+float Square(float v){
+	return v * v;
+}
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
 #include "UnityInput.hlsl"
 
 #define UNITY_MATRIX_M unity_ObjectToWorld
