@@ -17,27 +17,29 @@ public partial class CameraRender
         name = bufferName
     };
     
-    public void Render(ScriptableRenderContext context,Camera camera,bool useDynamicBatching,bool useGPUInstancing)
+    public void Render(ScriptableRenderContext context,Camera camera,bool useDynamicBatching,bool useGPUInstancing,ShadowSettings shadowSettings)
     {
         this.context = context;
         this.camera = camera;
 
         PrepareBuffer();
         PrepareForSceneWindow();
-        if (!Cull())
+        if (!Cull(shadowSettings.maxDistance))
             return;
 
         SetUp();
-        lighting.Setup(context,cullResults);
+        lighting.Setup(context,cullResults,shadowSettings);
         DrawVisbleGeometry(useDynamicBatching,useGPUInstancing);
         DrawUnsupportedShaders();
         DrawGizmos();
+        lighting.Cleanup();
         Submit();
     }
 
-    public bool Cull()
+    public bool Cull(float maxShadowDistance)
     {
         if (camera.TryGetCullingParameters(out ScriptableCullingParameters p)){
+            p.shadowDistance = Mathf.Min(camera.farClipPlane, maxShadowDistance);
             cullResults = context.Cull(ref p);
             return true;
         }

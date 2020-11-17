@@ -10,7 +10,8 @@ public class Lighting
     static int dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirections");
     static Vector4[] dirLightColors = new Vector4[maxDirLigthCount];
     static Vector4[] dirLightDirections = new Vector4[maxDirLigthCount];
-    
+
+    Shadows shadows = new Shadows();
 
     const string bufferName = "Lighting";
     ScriptableRenderContext context;
@@ -20,13 +21,15 @@ public class Lighting
         name = bufferName
     };
 
-    public void Setup(ScriptableRenderContext context,CullingResults cullingResults)
+    public void Setup(ScriptableRenderContext context,CullingResults cullingResults,ShadowSettings shadowSettings)
     {
         this.context = context;
         this.cullingResults = cullingResults;
 
         buffer.BeginSample(bufferName);
+        shadows.Setup(context, cullingResults, shadowSettings);
         SetupLights();
+        shadows.Render();
         buffer.EndSample(bufferName);
         Submit();
     }
@@ -35,6 +38,11 @@ public class Lighting
     {
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();
+    }
+
+    public void Cleanup()
+    {
+        shadows.Cleanup();
     }
 
     void SetupLights()
@@ -63,5 +71,6 @@ public class Lighting
     {
         dirLightColors[index] = visibleLight.finalColor;
         dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
+        shadows.ReserveDirectionalShadows(visibleLight.light, index);
     }
 }
